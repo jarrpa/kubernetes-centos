@@ -9,30 +9,17 @@
 - name: disable of selinux - now
   command: setenforce 0
 
-- name: install utility programs
-  yum: name={{ item }} state=present
-  with_items:
-    - wget
-    - screen
-    - epel-release
-    - git
-    - vim
-    - centos-release-gluster
-    - iptables
-    - iptables-utils
-    - iptables-services
-
-- name: install glusterfs client
-  yum: name=glusterfs-client state=present
+- name: install centos and epel repos
+  command: yum -y install centos-release-gluster epel-release
 
 - name: setup kubernetes repo
   copy: src=kubernetes.repo owner=root group=root dest=/etc/yum.repos.d
 
+- name: install base packages
+  command: yum -y install {{ install_pkgs }}
+
 - name: Ensure net.bridge.bridge-nf-call-iptables is set. See kubeadm
   copy: src=k8s.conf owner=root group=root dest=/etc/sysctl.d/k8s.conf
-
-- name: install kube components
-  command: yum -y install docker kubelet kubeadm kubectl kubernetes-cni
 
 - name: enable kube services
   service: name={{ item }} state=started enabled=yes
