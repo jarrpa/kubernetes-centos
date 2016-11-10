@@ -16,7 +16,7 @@
 - name: clean up kubernetes /etc directory
   file: path=/etc/kubernetes/manifests state=absent
 
-- name: join with master
+- name: kubeadm join with master
   command: kubeadm join --token={{ kubernetes_token }} {{ hostvars['master'].ansible_eth1.ipv4.address }}
 
 #- name: save iptables
