@@ -1,7 +1,7 @@
 # Heketi Deployment
 This is a collection of scripts and config files to deploy heketi on Kubernetes running on the CentOS 7 cluster.
 
-To deploy heketi, do the following:
+To deploy heketi, copy this directory to the master node of the cluster and do the following:
 
 ```bash
 # ./01-setup-account.sh
