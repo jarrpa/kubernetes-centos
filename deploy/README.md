@@ -4,17 +4,14 @@ This is a collection of scripts and config files to deploy heketi on Kubernetes 
 To deploy heketi, copy this directory to the master node of the cluster and do the following:
 
 ```bash
-# ./01-setup-account.sh
-# source 02-vars.sh
-# ./03-setup-gluster.sh
-# ./watch.sh # Wait for pod creation to complete
-# ./04-setup-deploy
-# ./watch.sh # Wait for pod creation to complete
-# source 05-vars.sh
-# ./06-topology.sh
-# ./watch.sh # Wait for job to complete
-# ./07-heketi.sh
-# ./watch.sh # Wait for pod creation to complete
-# source 08-vars.sh
+# export KUBECONFIG="/etc/kubernetes/admin.conf"
+# ./heketi-deploy
 ```
-You should now be able to juse `heketi-cli` to create volumes and then mount those volumes to verify they're working.
+
+heketi should not be installed and ready to go. For ease of testing, we recommend the following:
+
+```
+# export HEKETI_CLI_SERVER=$(kubectl describe svc/heketi | grep "Endpoints:" | awk '{print "http://"$2}')
+```
+
+You should now be able to use `heketi-cli` to create volumes and then mount those volumes to verify they're working.
