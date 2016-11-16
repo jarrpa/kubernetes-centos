@@ -5,9 +5,8 @@
                 {
                     "node": {
                         "hostnames": {
-                            "hostname": "node0",
                             "manage": [
-                                "192.168.10.100"
+                                "node0"
                             ],
                             "storage": [
                                 "192.168.10.100"
@@ -24,9 +23,8 @@
                 {
                     "node": {
                         "hostnames": {
-                            "hostname": "node1",
                             "manage": [
-                                "192.168.10.101"
+                                "node1"
                             ],
                             "storage": [
                                 "192.168.10.101"
@@ -43,9 +41,8 @@
                 {
                     "node": {
                         "hostnames": {
-                            "hostname": "node2",
                             "manage": [
-                                "192.168.10.102"
+                                "node2"
                             ],
                             "storage": [
                                 "192.168.10.102"

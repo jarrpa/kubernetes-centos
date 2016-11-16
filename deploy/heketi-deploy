@@ -270,18 +270,16 @@ topo = json.load(file)
 
 for cluster in topo['clusters']:
   for node in cluster['nodes']:
-    print node['node']['hostnames']['hostname'] + ' ' + node['node']['hostnames']['manage'][0]
+    print node['node']['hostnames']['manage'][0]
 END
 )
 
   while read -r node; do
-    name=$(echo ${node} | awk '{print $1}')
-    ip=$(echo ${node} | awk '{print $2}')
-    debug "Deploying GlusterFS pods on ${name} [${ip}]."
+    debug "Deploying GlusterFS pods on ${node}."
     if [ "${CLI}" == "oc" ]; then
-      oc process glusterfs GLUSTERFS_NODE=${ip} NODE_NAME=${name} | oc create -f -
+      oc process glusterfs GLUSTERFS_NODE=${node} NODE_NAME=${name} | oc create -f -
     else
-      sed -e "s#<GLUSTERFS_NODE>#${ip}#" -e "s#<NODE_NAME>#${name}#" glusterfs-deployment.json | kubectl create -f -
+      sed -e "s#<GLUSTERFS_NODE>#${node}#" glusterfs-deployment.json | kubectl create -f -
     fi
   done <<< "$(echo -e "$gfs_nodes")"
 

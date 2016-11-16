@@ -25,7 +25,7 @@
             },
             "spec": {
                 "nodeSelector": {
-                    "kubernetes.io/hostname": "<NODE_NAME>"
+                    "kubernetes.io/hostname": "<GLUSTERFS_NODE>"
                 },
                 "hostNetwork": true,
                 "containers": [
