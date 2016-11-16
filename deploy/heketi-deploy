@@ -18,7 +18,7 @@ PROG="$(basename "${0}")"
 TOPOLOGY='topology.json'
 LOG_FILE=''
 VERBOSE=0
-CLI=""
+CLI=''
 GLUSTER=0
 TEMPLATES="/usr/share/heketi/templates"
 WAIT=300
@@ -69,14 +69,19 @@ Options:
 }
 
 output() {
-  echo -e "${1}"
+  opts="-e"
+  if [ "${1}" == "-n" ]; then
+    opts+="n"
+    shift
+  fi
+  echo "$opts" "${1}"
   if [[ "${LOG_FILE}" ]]; then
-    echo -e "${1}" > "${LOG_FILE}"
+    echo $opts "${1}" > "${LOG_FILE}"
   fi
 }
 
 debug() {
-  if [ ${VERBOSE} ]; then
+  if [[ ${VERBOSE} -eq 1 ]]; then
     output "${1}"
   fi
 }
@@ -141,10 +146,6 @@ check_pods() {
   done
 }
 
-if [[ $# -lt 1 ]]; then
-  usage
-fi
-
 while [[ $# -ge 1 ]]; do
   key="${1}"
 
@@ -158,7 +159,7 @@ while [[ $# -ge 1 ]]; do
         CLI="oc"
         ;;
         g*|-deploy-gluster)
-        GLUSTER=true
+        GLUSTER=1
         ;;
         t*|-templates_dir*)
         TEMPLATES=$(assign "${key:${keypos}}" "${2}")
@@ -252,12 +253,13 @@ fi
 context=$(kubectl config current-context 2>&1)
 if [ "${context}" == error* ]; then
   output "Error getting Kubernetes context. Is your KUBECONFIG set correctly?"
+  abort
 fi
 
 cluster=$(kubectl config view -o jsonpath="{.contexts[?(@.name==\"$context\")].context.cluster}")
 kubeapi=$(kubectl config view -o jsonpath="{.clusters[?(@.name==\"$cluster\")].cluster.server}")
 
-if [ $GLUSTER ]; then
+if [[ $GLUSTER -eq 1 ]]; then
   gfs_nodes=$(python - <<END
 import sys
 import json
@@ -283,7 +285,9 @@ END
     fi
   done <<< "$(echo -e "$gfs_nodes")"
 
+  output -n "Waiting for GlusterFS pods to start ... "
   check_pods "glusterfs=pod"
+  output "OK"
 fi
 
 if [ "${CLI}" == "oc" ]; then
@@ -298,7 +302,9 @@ else
       -e "s#<HEKETI_KUBE_APIHOST>#\"${kubeapi}\"#" deploy-heketi-deployment.json | kubectl create -f -
 fi
 
+output -n "Waiting for deploy-heketi pod to start ... "
 check_pods "glusterfs=heketi-pod"
+output "OK"
 
 heketi_service=$(kubectl describe svc/deploy-heketi | grep "Endpoints:" | awk '{print $2}')
 hello=$(curl http://${heketi_service}/hello)
@@ -327,7 +333,9 @@ else
       -e "s#<HEKETI_KUBE_APIHOST>#\"${kubeapi}\"#" heketi-deployment.json | kubectl create -f -
 fi
 
+output -n "Waiting for heketi pod to start ... "
 check_pods "glusterfs=heketi-pod"
+output "OK"
 
 heketi_service=$(kubectl describe svc/heketi | grep "Endpoints:" | awk '{print $2}')
 hello=$(curl http://${heketi_service}/hello)
